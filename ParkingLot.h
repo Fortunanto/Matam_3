@@ -4,6 +4,7 @@
 #include "ParkingLotTypes.h"
 #include "Time.h"
 #include "ParkingSpot.h"
+#include "UniqueArray.h"
 
 namespace MtmParkingLot {
 
@@ -11,14 +12,20 @@ namespace MtmParkingLot {
     using std::ostream;
 
     class ParkingLot {
-    public:
 
+    public:
         ParkingLot(unsigned int parkingBlockSizes[]);
         ~ParkingLot();
-        ParkingResult enterParking(VehicleType vehicleType, LicensePlate licensePlate, Time entranceTime);
+        ParkingResult enterParking(VehicleType vehicleType,
+                LicensePlate licensePlate, Time entranceTime);
+
         ParkingResult exitParking(LicensePlate licensePlate, Time exitTime);
-        ParkingResult getParkingSpot(LicensePlate licensePlate, ParkingSpot& parkingSpot) const;
+
+        ParkingResult getParkingSpot(LicensePlate licensePlate,
+                ParkingSpot& parkingSpot) const;
+
         void inspectParkingLot(Time inspectionTime);
+        
         friend ostream& operator<<(ostream& os, const ParkingLot& parkingLot);
 
     };
