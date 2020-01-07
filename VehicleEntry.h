@@ -14,14 +14,18 @@ namespace MtmParkingLot{
         Time entranceTime;
         LicensePlate licensePlate;
         ParkingSpot parkingSpot;
+        VehicleType vehicleType;
 
         public:
-        VehicleEntry(Time parkingTime, LicensePlate licensePlate)
-        :entranceTime(parkingTime),licensePlate(licensePlate),penalty(0){}; 
+        VehicleEntry(Time parkingTime, LicensePlate licensePlate,
+        VehicleType parkingBlock,int parkingNumber)
+            :entranceTime(parkingTime),licensePlate(licensePlate),
+            penalty(0),parkingSpot(parkingBlock,parkingNumber){}; 
 
         ParkingSpot getParkingSpot(){return parkingSpot;};   
         Time getEntranceTime(){return entranceTime;};  
         int calculateTotalFee(Time exitTime);  
+        VehicleType getVehicleType(){return vehicleType;};
     };
 
 }

@@ -37,6 +37,10 @@ namespace MtmParkingLot {
 
         friend ostream& operator<<(ostream& os, const ParkingLot& parkingLot);
 
+    private:
+        pair<VehicleType,int> 
+        tryFindSpotForHandicapped(LicensePlate licensePlate, Time entranceTime);
+
     };
 
 }
