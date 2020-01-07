@@ -12,6 +12,9 @@ const int AMOUNT_OF_VEHICLE_TYPES = 3;
 const int FAILED_TO_INSERT_TO_UNIQUE_ARRAY = -1;
 const int FAILED_TO_FIND_SPOT_FOR_HANDICAPPED = -1;
 
+const int PENALTY_HOUR_LIMIT = 24;
+const int PENALTY_FEE = 250;
+
 // ----------------- helper funcs ----------------------------
 
 int tryInsertToUniqueArray(UniqueArray<string>& arr,
@@ -65,6 +68,14 @@ pair<VehicleType,int> ParkingLot::
                                  FAILED_TO_FIND_SPOT_FOR_HANDICAPPED);
 }
 
+void ParkingLot::exitVehicleFromLot(LicensePlate licensePlate){
+    ParkingSpot vehicleSpot = this->parkedVehicles.at(licensePlate)
+                                                  ->getParkingSpot();
+
+    this->parkingLots[vehicleSpot.getParkingBlock()]->remove(licensePlate);
+    this->parkedVehicles.erase(licensePlate);
+}
+
 // ---------- implementation ----------------------------
 
 ParkingLot::ParkingLot(unsigned int parkingBlockSizes[]) {
@@ -111,7 +122,9 @@ ParkingResult ParkingLot::enterParking(VehicleType vehicleType,
     ParkingSpot newSpot(parkingBlock,numberInLot);
     printParkSuccess(vehicleType,licensePlate,entranceTime,newSpot);
 
-    VehicleEntry entry(entranceTime,licensePlate,parkingBlock,numberInLot);
+    VehicleEntry* entry = 
+        new VehicleEntry(entranceTime,licensePlate,parkingBlock,numberInLot,
+        vehicleType);
     this->parkedVehicles[licensePlate] = entry;
 
     return ParkingResult::SUCCESS;
@@ -125,7 +138,7 @@ ParkingResult ParkingLot::exitParking(LicensePlate licensePlate, Time exitTime){
         return ParkingResult::VEHICLE_NOT_FOUND;
     }
 
-    VehicleEntry leavingVehicle = this->parkedVehicles[licensePlate];
+    VehicleEntry leavingVehicle = *this->parkedVehicles[licensePlate];
 
     ParkingLotPrinter::printVehicle(cout,
                                     leavingVehicle.getParkingSpot()
@@ -137,9 +150,36 @@ ParkingResult ParkingLot::exitParking(LicensePlate licensePlate, Time exitTime){
                                         leavingVehicle.getParkingSpot(),
                                         exitTime,
                                         leavingVehicle.
-                                        calculateTotalFee(exitTime));
+                                        calculateTotalFee(exitTime));   
+
+    this->exitVehicleFromLot(licensePlate);
 
     return ParkingResult::SUCCESS;
+}
+
+ParkingResult ParkingLot::getParkingSpot(LicensePlate licensePlate,
+                ParkingSpot& parkingSpot) const{
+    try{        
+        parkingSpot = this->parkedVehicles.at(licensePlate)->getParkingSpot();
+        return ParkingResult::SUCCESS;
+    }
+    catch(const std::out_of_range&){
+        return ParkingResult::VEHICLE_NOT_FOUND;
+    }
+}
+
+void ParkingLot::inspectParkingLot(Time inspectionTime){
+    for (auto const& parkedVehiclePair : this->parkedVehicles)
+    {
+        LicensePlate licensePlate = parkedVehiclePair.first;
+        VehicleEntry entry = *parkedVehiclePair.second;
+
+        Time timediff = inspectionTime - entry.getEntranceTime();
+
+        if (timediff.toHours()>PENALTY_HOUR_LIMIT){
+            entry.addPenalty(PENALTY_FEE);
+        }
+    }
 }
 
 ostream& operator<<(ostream& os, const ParkingLot& parkingLot){

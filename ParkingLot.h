@@ -20,7 +20,7 @@ namespace MtmParkingLot {
 
     UniqueArray<string> **parkingLots;
 
-    map<LicensePlate,VehicleEntry> parkedVehicles;
+    map<LicensePlate,VehicleEntry*> parkedVehicles;
 
     public:
         ParkingLot(unsigned int parkingBlockSizes[]);
@@ -40,6 +40,8 @@ namespace MtmParkingLot {
     private:
         pair<VehicleType,int> 
         tryFindSpotForHandicapped(LicensePlate licensePlate, Time entranceTime);
+
+        void exitVehicleFromLot(LicensePlate licensePlate);
 
     };
 

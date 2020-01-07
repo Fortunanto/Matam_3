@@ -12,6 +12,28 @@ const int MAX_HOURS_PAYMENT = 6;
 
 using namespace MtmParkingLot;
 
+
+
+// -------------- payment calculations -----------------
+
+int calcFeeByTime(Time parkTime, int firstHourFee, int additionalHoursFee){
+    int hours = parkTime.toHours();
+    
+    if (hours == 0){
+        return 0;
+    }
+
+    if (hours > MAX_HOURS_PAYMENT){
+        hours = MAX_HOURS_PAYMENT;
+    }
+
+    hours--;
+
+    return firstHourFee + (additionalHoursFee * hours);    
+}
+
+// ----------------- implementations -------------------------------
+
 int VehicleEntry::calculateTotalFee(Time exitTime){
     int totalFee = 0;
 
@@ -37,23 +59,4 @@ int VehicleEntry::calculateTotalFee(Time exitTime){
     }
 
     return totalFee + this->penalty;
-}
-
-
-
-// -------------- payment calculations -----------------
-int calcFeeByTime(Time parkTime, int firstHourFee, int additionalHoursFee){
-    int hours = parkTime.toHours();
-    
-    if (hours == 0){
-        return 0;
-    }
-
-    if (hours > MAX_HOURS_PAYMENT){
-        hours = MAX_HOURS_PAYMENT;
-    }
-
-    hours--;
-
-    return firstHourFee + (additionalHoursFee * hours);    
 }

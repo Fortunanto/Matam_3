@@ -3,6 +3,7 @@
 
 #include "Time.h"
 #include "ParkingLotTypes.h"
+#include "ParkingSpot.h"
 
 using namespace ParkingLotUtils;
 
@@ -10,22 +11,24 @@ namespace MtmParkingLot{
     
     // todo: comment
     class VehicleEntry {
-        int penalty;
         Time entranceTime;
         LicensePlate licensePlate;
+        int penalty;      
         ParkingSpot parkingSpot;
         VehicleType vehicleType;
 
         public:
         VehicleEntry(Time parkingTime, LicensePlate licensePlate,
-        VehicleType parkingBlock,int parkingNumber)
+        VehicleType parkingBlock,int parkingNumber,VehicleType vehicleType)
             :entranceTime(parkingTime),licensePlate(licensePlate),
-            penalty(0),parkingSpot(parkingBlock,parkingNumber){}; 
+            penalty(0),parkingSpot(parkingBlock,parkingNumber),
+            vehicleType(vehicleType){}
 
-        ParkingSpot getParkingSpot(){return parkingSpot;};   
-        Time getEntranceTime(){return entranceTime;};  
+        ParkingSpot getParkingSpot(){return parkingSpot;} 
+        Time getEntranceTime(){return entranceTime;}
         int calculateTotalFee(Time exitTime);  
-        VehicleType getVehicleType(){return vehicleType;};
+        VehicleType getVehicleType(){return vehicleType;}
+        void addPenalty(int penaltyToAdd){penalty+=penaltyToAdd;}
     };
 
 }
