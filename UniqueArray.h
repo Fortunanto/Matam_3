@@ -3,7 +3,6 @@
 
 #include <functional>
 template <class Element, class Compare = std::equal_to<Element>>
-
 class UniqueArray {
 public:
 
@@ -27,9 +26,11 @@ public:
 private:
      Element const ** backingData;
     unsigned int size;
+    Compare comperator;
 };
 
 
 
 #include "UniqueArrayImp.h"
 #endif //MTMPARKINGLOT_UNIQUEARRAY_H
+
