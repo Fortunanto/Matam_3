@@ -25,10 +25,16 @@ UniqueArray<Element, Compare>::UniqueArray(const UniqueArray &other)
     backingData = new Element const *[size];
     for (unsigned int i = 0; i < size; i++)
     {
-        backingData[i] = new Element(*other.backingData[i]);
+        if (other.backingData[i])
+        {
+            backingData[i] = new Element(*other.backingData[i]);
+        }
+        else
+        {
+            backingData[i] = nullptr;
+        }
     }
 }
-
 template <class Element, class Compare>
 UniqueArray<Element, Compare>::~UniqueArray()
 {
@@ -42,7 +48,6 @@ UniqueArray<Element, Compare>::~UniqueArray()
 
     delete[] backingData;
 }
-
 template <class Element, class Compare>
 bool UniqueArray<Element, Compare>::getIndex(const Element &element, unsigned int &index) const
 {
@@ -50,8 +55,7 @@ bool UniqueArray<Element, Compare>::getIndex(const Element &element, unsigned in
     {
         if (backingData[i])
         {
-            const Element current_element = *backingData[i];
-            if (current_element == element)
+            if (comperator(*backingData[i], element))
             {
                 index = i;
                 return true;
@@ -76,7 +80,7 @@ unsigned int UniqueArray<Element, Compare>::insert(const Element &element)
         }
         else
         {
-            if (*backingData[i] == element)
+            if (comperator(*backingData[i], element))
             {
                 return i;
             }
@@ -96,8 +100,11 @@ const Element *UniqueArray<Element, Compare>::operator[](const Element &element)
 {
     for (unsigned int i = 0; i < size; i++)
     {
-        if (element == *backingData[i])
-            return backingData[i];
+        if (backingData[i])
+        {
+            if (comperator(*backingData[i], element))
+                return backingData[i];
+        }
     }
     return nullptr;
 }
@@ -107,11 +114,14 @@ bool UniqueArray<Element, Compare>::remove(const Element &element)
 {
     for (unsigned int i = 0; i < size; i++)
     {
-        if (*backingData[i] == element)
+        if (backingData[i])
         {
-            delete backingData[i];
-            backingData[i] = nullptr;
-            return true;
+            if (comperator(*backingData[i], element))
+            {
+                delete backingData[i];
+                backingData[i] = nullptr;
+                return true;
+            }
         }
     }
     return false;
@@ -143,9 +153,12 @@ UniqueArray<Element, Compare> UniqueArray<Element, Compare>::filter(const Unique
     UniqueArray<Element, Compare> copy = UniqueArray(size);
     for (unsigned int i = 0; i < size; i++)
     {
-        if (f(*backingData[i]))
+        if (backingData[i])
         {
-            copy.insert(*backingData[i]);
+            if (f(*backingData[i]))
+            {
+                copy.insert(*backingData[i]);
+            }
         }
     }
     return copy;
