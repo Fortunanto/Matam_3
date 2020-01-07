@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Technion/234124 MATAM/HW3/UniqueArray.h
+UniqueArrayImp.h
+C:/Technion/234124 MATAM/HW3/UniqueArrayImp.h
+
+C:/Technion/234124 MATAM/HW3/tests/UniqueArrayTest.cpp
+cassert
+-
+functional
+-
+iostream
+-
+cmath
+-
+../UniqueArray.h
+C:/Technion/234124 MATAM/HW3/UniqueArray.h
+
