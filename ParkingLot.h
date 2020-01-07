@@ -8,14 +8,19 @@
 #include "UniqueArray.h"
 #include "VehicleEntry.h"
 
+#include <map>
+
 namespace MtmParkingLot {
 
     using namespace ParkingLotUtils;
     using std::ostream;
+    using namespace std;
 
     class ParkingLot {
 
-    UniqueArray<VehicleEntry> **parkingLots;
+    UniqueArray<string> **parkingLots;
+
+    map<LicensePlate,VehicleEntry> parkedVehicles;
 
     public:
         ParkingLot(unsigned int parkingBlockSizes[]);
