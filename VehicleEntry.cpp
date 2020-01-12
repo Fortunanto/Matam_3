@@ -61,6 +61,6 @@ int VehicleEntry::calculateTotalFee(Time exitTime) const{
     return totalFee + this->penalty;
 }
 
-bool operator < (const VehicleEntry& ve1, const VehicleEntry& ve2) {
+bool operator< (const VehicleEntry& ve1, const VehicleEntry& ve2) {
     return ve1.getParkingSpot()<ve2.getParkingSpot();
 }

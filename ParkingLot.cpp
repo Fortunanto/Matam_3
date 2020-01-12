@@ -192,10 +192,10 @@ ostream& operator<<(ostream& os, const ParkingLot& parkingLot){
         = getSortedVectorOfVehicleEntries(parkingLot.getParkedVehicles());
     
     for(const auto& entry: sortedEntries) {       
-        ParkingLotPrinter::printVehicle(cout,entry.getVehicleType(),
+        ParkingLotPrinter::printVehicle(os,entry.getVehicleType(),
         entry.getLicensePlate(), entry.getEntranceTime());
 
-        ParkingLotPrinter::printParkingSpot(cout,entry.getParkingSpot());
+        ParkingLotPrinter::printParkingSpot(os,entry.getParkingSpot());
     }
 
     return os;
