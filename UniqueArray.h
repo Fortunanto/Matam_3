@@ -1,6 +1,7 @@
 #ifndef MTMPARKINGLOT_UNIQUEARRAY_H
 #define MTMPARKINGLOT_UNIQUEARRAY_H
 
+#include <functional>
 template <class Element, class Compare = std::equal_to<Element>>
 class UniqueArray {
 public:
@@ -15,7 +16,6 @@ public:
     bool remove(const Element& element);
     unsigned int getCount() const;
     unsigned int getSize() const;
-
     class Filter {
     public:
         virtual bool operator() (const Element&) const = 0;
@@ -23,10 +23,13 @@ public:
     UniqueArray filter(const Filter& f) const;
 
     class UniqueArrayIsFullException{};
-    
+private:
+     Element const ** backingData;
+    unsigned int size;
+    Compare comperator;
 };
 
-//#include "UniqueArrayImp.h"
 
 
+#include "UniqueArrayImp.h"
 #endif //MTMPARKINGLOT_UNIQUEARRAY_H
