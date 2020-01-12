@@ -34,7 +34,7 @@ int calcFeeByTime(Time parkTime, int firstHourFee, int additionalHoursFee){
 
 // ----------------- implementations -------------------------------
 
-int VehicleEntry::calculateTotalFee(Time exitTime){
+int VehicleEntry::calculateTotalFee(Time exitTime) const{
     int totalFee = 0;
 
     Time timeInParking = exitTime-this->entranceTime;
@@ -59,4 +59,8 @@ int VehicleEntry::calculateTotalFee(Time exitTime){
     }
 
     return totalFee + this->penalty;
+}
+
+bool operator < (const VehicleEntry& ve1, const VehicleEntry& ve2) {
+    return ve1.getParkingSpot()<ve2.getParkingSpot();
 }

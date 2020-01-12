@@ -1,6 +1,8 @@
 #include "ParkingLot.h"
 #include "UniqueArray.h"
 #include "ParkingLotPrinter.h"
+#include <vector>
+#include <algorithm>
 
 using std::ostream;
 
@@ -42,6 +44,20 @@ void printParkSuccess(VehicleType vehicleType, LicensePlate licensePlate,
     ParkingLotPrinter::printParkingSpot(cout,parkingSpot);
 }
 
+vector<VehicleEntry>
+ getSortedVectorOfVehicleEntries(map<string,VehicleEntry> inputMap){
+     vector<VehicleEntry> resultVec;
+
+     for(map<string,VehicleEntry>::iterator it = inputMap.begin();
+             it != inputMap.end(); ++it ) {
+        resultVec.push_back( it->second );
+    }
+
+    std::sort(resultVec.begin(),resultVec.end());
+
+    return resultVec;
+} 
+
 // ---------- implementation - helper funcs -----------------
 
 pair<VehicleType,int> ParkingLot::
@@ -49,7 +65,7 @@ pair<VehicleType,int> ParkingLot::
     int blockInLot;
 
     blockInLot =
-         tryInsertToUniqueArray(*this->parkingLots[VehicleType::HANDICAPPED],
+         tryInsertToUniqueArray(this->parkingLots[VehicleType::HANDICAPPED],
                                 licensePlate);
 
     if (blockInLot != FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
@@ -57,7 +73,7 @@ pair<VehicleType,int> ParkingLot::
     }
 
     blockInLot =
-         tryInsertToUniqueArray(*this->parkingLots[VehicleType::CAR],
+         tryInsertToUniqueArray(this->parkingLots[VehicleType::CAR],
                                 licensePlate);
 
     if (blockInLot != FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
@@ -70,30 +86,16 @@ pair<VehicleType,int> ParkingLot::
 
 void ParkingLot::exitVehicleFromLot(LicensePlate licensePlate){
     ParkingSpot vehicleSpot = this->parkedVehicles.at(licensePlate)
-                                                  ->getParkingSpot();
+                                                  .getParkingSpot();
 
-    this->parkingLots[vehicleSpot.getParkingBlock()]->remove(licensePlate);
+    this->parkingLots[vehicleSpot.getParkingBlock()].remove(licensePlate);
     this->parkedVehicles.erase(licensePlate);
 }
 
 // ---------- implementation ----------------------------
 
-ParkingLot::ParkingLot(unsigned int parkingBlockSizes[]) {
-    // todo: handle allocation exception?
-    this->parkingLots = new UniqueArray<string>*[AMOUNT_OF_VEHICLE_TYPES];
-    for (int i = 0; i < AMOUNT_OF_VEHICLE_TYPES; i++) {
-        this->parkingLots[i] =  new UniqueArray<string>(parkingBlockSizes[i]);
-    }
-}
-
 ParkingLot::~ParkingLot() {
-    // todo: handle idk exceptions?
-    for (int i = 0; i < AMOUNT_OF_VEHICLE_TYPES; i++) {
-        delete parkingLots[i];
-
-    }
-
-    //todo: maybe delete map?
+   //todo: maybe delete map?
 }
 
 ParkingResult ParkingLot::enterParking(VehicleType vehicleType,
@@ -108,7 +110,7 @@ ParkingResult ParkingLot::enterParking(VehicleType vehicleType,
     }
     else {
         numberInLot = 
-            tryInsertToUniqueArray(*this->parkingLots[vehicleType],
+            tryInsertToUniqueArray(this->parkingLots[vehicleType],
                                    licensePlate);
         parkingBlock = vehicleType;
     }
@@ -122,10 +124,10 @@ ParkingResult ParkingLot::enterParking(VehicleType vehicleType,
     ParkingSpot newSpot(parkingBlock,numberInLot);
     printParkSuccess(vehicleType,licensePlate,entranceTime,newSpot);
 
-    VehicleEntry* entry = 
-        new VehicleEntry(entranceTime,licensePlate,parkingBlock,numberInLot,
+    VehicleEntry entry(entranceTime,licensePlate,parkingBlock,numberInLot,
         vehicleType);
-    this->parkedVehicles[licensePlate] = entry;
+    
+    this->parkedVehicles.insert({licensePlate,entry});
 
     return ParkingResult::SUCCESS;
 }
@@ -138,7 +140,7 @@ ParkingResult ParkingLot::exitParking(LicensePlate licensePlate, Time exitTime){
         return ParkingResult::VEHICLE_NOT_FOUND;
     }
 
-    VehicleEntry leavingVehicle = *this->parkedVehicles[licensePlate];
+    VehicleEntry leavingVehicle = this->parkedVehicles[licensePlate];
 
     ParkingLotPrinter::printVehicle(cout,
                                     leavingVehicle.getParkingSpot()
@@ -160,7 +162,7 @@ ParkingResult ParkingLot::exitParking(LicensePlate licensePlate, Time exitTime){
 ParkingResult ParkingLot::getParkingSpot(LicensePlate licensePlate,
                 ParkingSpot& parkingSpot) const{
     try{        
-        parkingSpot = this->parkedVehicles.at(licensePlate)->getParkingSpot();
+        parkingSpot = this->parkedVehicles.at(licensePlate).getParkingSpot();
         return ParkingResult::SUCCESS;
     }
     catch(const std::out_of_range&){
@@ -172,7 +174,7 @@ void ParkingLot::inspectParkingLot(Time inspectionTime){
     for (auto const& parkedVehiclePair : this->parkedVehicles)
     {
         LicensePlate licensePlate = parkedVehiclePair.first;
-        VehicleEntry entry = *parkedVehiclePair.second;
+        VehicleEntry entry = parkedVehiclePair.second;
 
         Time timediff = inspectionTime - entry.getEntranceTime();
 
@@ -186,6 +188,15 @@ ostream& operator<<(ostream& os, const ParkingLot& parkingLot){
     
     ParkingLotPrinter::printParkingLotTitle(os);
     
+    vector<VehicleEntry> sortedEntries 
+        = getSortedVectorOfVehicleEntries(parkingLot.getParkedVehicles());
+    
+    for(const auto& entry: sortedEntries) {       
+        ParkingLotPrinter::printVehicle(cout,entry.getVehicleType(),
+        entry.getLicensePlate(), entry.getEntranceTime());
+
+        ParkingLotPrinter::printParkingSpot(cout,entry.getParkingSpot());
+    }
 
     return os;
 }
