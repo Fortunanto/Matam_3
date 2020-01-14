@@ -54,10 +54,23 @@ namespace MtmParkingLot {
          * @return A pair where the first member is the block that the handicapped has parked in.
          *         The second member is the number in that block.
          *
-         *         The second member value will be -1 if no parking was available at all.
+         *         The second member value will be FAILED_TO_INSERT_TO_UNIQUE_ARRAY if no parking was available at all.
          */
         pair<VehicleType,int> 
         tryFindSpotForHandicapped(LicensePlate licensePlate, Time entranceTime);
+        
+        /**
+         * Tries to insert a vehicle to the lot.
+         *   
+         * @return A pair where the first member is the block that the handicapped has parked in.
+         *         The second member is the number in that block.
+         *
+         *         The second member value will be FAILED_TO_INSERT_TO_UNIQUE_ARRAY if no parking was available at all.
+         */
+        pair<VehicleType,int> tryInsertToParkingLot(VehicleType vehicleType,
+                LicensePlate licensePlate,
+                Time entranceTime);
+
         /**
          * Physically removes a vehicle from the parking lot.
          *

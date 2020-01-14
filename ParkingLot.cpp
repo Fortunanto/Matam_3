@@ -13,7 +13,7 @@ namespace MtmParkingLot {
     const int AMOUNT_OF_VEHICLE_TYPES = 3;
 
     const int FAILED_TO_INSERT_TO_UNIQUE_ARRAY = -1;
-    const int FAILED_TO_FIND_SPOT_FOR_HANDICAPPED = -1;
+    const int FAILED_TO_FIND_SPOT = -1;
 
     const int PENALTY_HOUR_LIMIT = 24;
     const int PENALTY_FEE = 250;
@@ -25,7 +25,7 @@ namespace MtmParkingLot {
      * @param arr
      * @param licensePlate
      * @return If insertion was successful -The index in the array the element was inserted to.
-     *         Otherwise, returns -1.
+     *         Otherwise, returns FAILED_TO_INSERT_TO_UNIQUE_ARRAY.
      */
     int tryInsertToUniqueArray(UniqueArray<string>& arr,
                             LicensePlate licensePlate){
@@ -93,7 +93,7 @@ namespace MtmParkingLot {
     // ---------- implementation - helper funcs -----------------
 
     pair<VehicleType,int> ParkingLot::
-        tryFindSpotForHandicapped(LicensePlate licensePlate, Time entranceTime){
+    tryFindSpotForHandicapped(LicensePlate licensePlate, Time entranceTime){
         int blockInLot;
 
         blockInLot =
@@ -113,7 +113,31 @@ namespace MtmParkingLot {
         }
 
         return make_pair(VehicleType::HANDICAPPED,
-                                    FAILED_TO_FIND_SPOT_FOR_HANDICAPPED);
+                                    FAILED_TO_INSERT_TO_UNIQUE_ARRAY);
+    }
+
+
+    /**
+     * Tries to insert a vehicle to the lot.
+     *   
+     * @return A pair where the first member is the block that the handicapped has parked in.
+     *         The second member is the number in that block.
+     *
+     *         The second member value will be FAILED_TO_INSERT_TO_UNIQUE_ARRAY if no parking was available at all.
+     */
+    pair<VehicleType,int> ParkingLot::tryInsertToParkingLot(
+                VehicleType vehicleType,
+                LicensePlate licensePlate,
+                Time entranceTime){
+        if (vehicleType == VehicleType::HANDICAPPED){
+            return this->tryFindSpotForHandicapped(licensePlate,entranceTime);             
+        }
+        
+        return
+            make_pair(vehicleType,
+            tryInsertToUniqueArray(this->
+                    parkingLots[vehicleType],licensePlate));
+    
     }
 
     void ParkingLot::exitVehicleFromLot(LicensePlate licensePlate){
@@ -123,7 +147,7 @@ namespace MtmParkingLot {
         this->parkingLots[vehicleSpot.getParkingBlock()].remove(licensePlate);
         this->parkedVehicles.erase(licensePlate);
     }
-
+    
     // ---------- implementation ----------------------------
 
     ParkingResult ParkingLot::enterParking(VehicleType vehicleType,
@@ -136,20 +160,11 @@ namespace MtmParkingLot {
             printAlreadyParked(this->parkedVehicles.at(licensePlate));
             return ParkingResult::VEHICLE_ALREADY_PARKED;
         }
+        
+        tie(parkingBlock,numberInLot) = tryInsertToParkingLot(vehicleType,
+            licensePlate, entranceTime);
 
-        if (vehicleType == VehicleType::HANDICAPPED){
-            tie(parkingBlock,numberInLot) = 
-                this->tryFindSpotForHandicapped(licensePlate,entranceTime);             
-        }
-        else {
-            numberInLot = 
-                tryInsertToUniqueArray(this->parkingLots[vehicleType],
-                                    licensePlate);
-            parkingBlock = vehicleType;
-        }
-
-        if (numberInLot == FAILED_TO_FIND_SPOT_FOR_HANDICAPPED ||
-            numberInLot == FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
+        if (numberInLot == FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
             printParkFailure(vehicleType,licensePlate,entranceTime);
             return ParkingResult::NO_EMPTY_SPOT;
         }
