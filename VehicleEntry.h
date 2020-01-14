@@ -18,7 +18,7 @@ namespace MtmParkingLot{
         VehicleType vehicleType;
 
         public:
-        VehicleEntry();
+        VehicleEntry(){};
         VehicleEntry(Time parkingTime, LicensePlate licensePlate,
         VehicleType parkingBlock,int parkingNumber,VehicleType vehicleType)
             :entranceTime(parkingTime),licensePlate(licensePlate),
@@ -32,7 +32,8 @@ namespace MtmParkingLot{
         LicensePlate getLicensePlate() const {return licensePlate;}
         int calculateTotalFee(Time exitTime) const;  
         VehicleType getVehicleType() const{return vehicleType;}
-        void addPenalty (int penaltyToAdd){penalty+=penaltyToAdd;}
+        void addPenalty (int penaltyToAdd){this->penalty+=penaltyToAdd;}
+        int getPenalty(){return this->penalty;}
 
     };
 

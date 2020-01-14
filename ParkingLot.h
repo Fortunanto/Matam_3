@@ -43,7 +43,7 @@ namespace MtmParkingLot {
 
         void inspectParkingLot(Time inspectionTime);
 
-        friend ostream& operator<<(ostream& os, const ParkingLot& parkingLot);
+        friend ostream& operator<<(ostream& os, ParkingLot const& parkingLot);
 
     private:
         pair<VehicleType,int> 

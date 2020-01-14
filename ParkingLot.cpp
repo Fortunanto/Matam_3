@@ -7,205 +7,212 @@
 using std::ostream;
 
 using namespace ParkingLotUtils;
-using namespace MtmParkingLot;
 
-const int AMOUNT_OF_VEHICLE_TYPES = 3;
+namespace MtmParkingLot {
 
-const int FAILED_TO_INSERT_TO_UNIQUE_ARRAY = -1;
-const int FAILED_TO_FIND_SPOT_FOR_HANDICAPPED = -1;
+    const int AMOUNT_OF_VEHICLE_TYPES = 3;
 
-const int PENALTY_HOUR_LIMIT = 24;
-const int PENALTY_FEE = 250;
+    const int FAILED_TO_INSERT_TO_UNIQUE_ARRAY = -1;
+    const int FAILED_TO_FIND_SPOT_FOR_HANDICAPPED = -1;
 
-// ----------------- helper funcs ----------------------------
+    const int PENALTY_HOUR_LIMIT = 24;
+    const int PENALTY_FEE = 250;
 
-int tryInsertToUniqueArray(UniqueArray<string>& arr,
-                           LicensePlate licensePlate){
-    try {
-           return (int)(arr.insert(licensePlate));
+    // ----------------- helper funcs ----------------------------
+
+    int tryInsertToUniqueArray(UniqueArray<string>& arr,
+                            LicensePlate licensePlate){
+        try {
+            return (int)(arr.insert(licensePlate));
+            }
+            catch (UniqueArray<string>::UniqueArrayIsFullException& e){           
+                return FAILED_TO_INSERT_TO_UNIQUE_ARRAY;
+            }
+    }
+
+    void printParkFailure(VehicleType vehicleType, LicensePlate licensePlate,
+                            Time entranceTime){
+                                // todo: maybe add endl?
+        ParkingLotPrinter::printVehicle(cout,vehicleType,licensePlate,entranceTime);
+        ParkingLotPrinter::printEntryFailureNoSpot(cout);
+    }
+
+    void printParkSuccess(VehicleType vehicleType, LicensePlate licensePlate,
+                            Time entranceTime,ParkingSpot parkingSpot){
+        ParkingLotPrinter::printVehicle(cout,vehicleType,licensePlate,entranceTime);        
+        ParkingLotPrinter::printEntrySuccess(cout,parkingSpot);   
+    }
+
+    void printAlreadyParked(VehicleEntry entry){
+        ParkingLotPrinter::printVehicle(cout,entry.getVehicleType(),entry.getLicensePlate(),entry.getEntranceTime());
+        ParkingLotPrinter::printEntryFailureAlreadyParked(cout,entry.getParkingSpot());        
+    }
+
+    vector<VehicleEntry>
+    getSortedVectorOfVehicleEntries(map<string,VehicleEntry> inputMap){
+        vector<VehicleEntry> resultVec;
+
+        for(map<string,VehicleEntry>::iterator it = inputMap.begin();
+                it != inputMap.end(); ++it ) {
+            resultVec.push_back( it->second );
         }
-        catch (UniqueArray<string>::UniqueArrayIsFullException& e){           
-            return FAILED_TO_INSERT_TO_UNIQUE_ARRAY;
+
+        std::sort(resultVec.begin(),resultVec.end());
+
+        return resultVec;
+    } 
+
+    // ---------- implementation - helper funcs -----------------
+
+    pair<VehicleType,int> ParkingLot::
+        tryFindSpotForHandicapped(LicensePlate licensePlate, Time entranceTime){
+        int blockInLot;
+
+        blockInLot =
+            tryInsertToUniqueArray(this->parkingLots[VehicleType::HANDICAPPED],
+                                    licensePlate);
+
+        if (blockInLot != FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
+            return make_pair(VehicleType::HANDICAPPED,blockInLot);
         }
-}
 
-void printParkFailure(VehicleType vehicleType, LicensePlate licensePlate,
-                        Time entranceTime){
-                            // todo: maybe add endl?
-    ParkingLotPrinter::printVehicle(cout,vehicleType,licensePlate,entranceTime);
-    cout << " , ";
-    ParkingLotPrinter::printEntryFailureNoSpot(cout);
-}
+        blockInLot =
+            tryInsertToUniqueArray(this->parkingLots[VehicleType::CAR],
+                                    licensePlate);
 
-void printParkSuccess(VehicleType vehicleType, LicensePlate licensePlate,
-                        Time entranceTime,ParkingSpot parkingSpot){
-    ParkingLotPrinter::printVehicle(cout,vehicleType,licensePlate,entranceTime);
-    cout << " , ";
-    ParkingLotPrinter::printParkingSpot(cout,parkingSpot);
-}
+        if (blockInLot != FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
+            return make_pair(VehicleType::CAR,blockInLot);
+        }
 
-vector<VehicleEntry>
- getSortedVectorOfVehicleEntries(map<string,VehicleEntry> inputMap){
-     vector<VehicleEntry> resultVec;
-
-     for(map<string,VehicleEntry>::iterator it = inputMap.begin();
-             it != inputMap.end(); ++it ) {
-        resultVec.push_back( it->second );
+        return make_pair(VehicleType::HANDICAPPED,
+                                    FAILED_TO_FIND_SPOT_FOR_HANDICAPPED);
     }
 
-    std::sort(resultVec.begin(),resultVec.end());
+    void ParkingLot::exitVehicleFromLot(LicensePlate licensePlate){
+        ParkingSpot vehicleSpot = this->parkedVehicles.at(licensePlate)
+                                                    .getParkingSpot();
 
-    return resultVec;
-} 
-
-// ---------- implementation - helper funcs -----------------
-
-pair<VehicleType,int> ParkingLot::
-    tryFindSpotForHandicapped(LicensePlate licensePlate, Time entranceTime){
-    int blockInLot;
-
-    blockInLot =
-         tryInsertToUniqueArray(this->parkingLots[VehicleType::HANDICAPPED],
-                                licensePlate);
-
-    if (blockInLot != FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
-        return make_pair(VehicleType::HANDICAPPED,blockInLot);
+        this->parkingLots[vehicleSpot.getParkingBlock()].remove(licensePlate);
+        this->parkedVehicles.erase(licensePlate);
     }
 
-    blockInLot =
-         tryInsertToUniqueArray(this->parkingLots[VehicleType::CAR],
-                                licensePlate);
+    // ---------- implementation ----------------------------
 
-    if (blockInLot != FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
-        return make_pair(VehicleType::CAR,blockInLot);
+    ParkingLot::~ParkingLot() {
+    //todo: maybe delete map?
     }
 
-    return make_pair(VehicleType::HANDICAPPED,
-                                 FAILED_TO_FIND_SPOT_FOR_HANDICAPPED);
-}
+    ParkingResult ParkingLot::enterParking(VehicleType vehicleType,
+                LicensePlate licensePlate,
+                Time entranceTime) {    
+        VehicleType parkingBlock;
+        int numberInLot;
 
-void ParkingLot::exitVehicleFromLot(LicensePlate licensePlate){
-    ParkingSpot vehicleSpot = this->parkedVehicles.at(licensePlate)
-                                                  .getParkingSpot();
+        if (this->parkedVehicles.count(licensePlate)>0){
+            printAlreadyParked(this->parkedVehicles.at(licensePlate));
+            return ParkingResult::VEHICLE_ALREADY_PARKED;
+        }
 
-    this->parkingLots[vehicleSpot.getParkingBlock()].remove(licensePlate);
-    this->parkedVehicles.erase(licensePlate);
-}
+        if (vehicleType == VehicleType::HANDICAPPED){
+            tie(parkingBlock,numberInLot) = 
+                this->tryFindSpotForHandicapped(licensePlate,entranceTime);             
+        }
+        else {
+            numberInLot = 
+                tryInsertToUniqueArray(this->parkingLots[vehicleType],
+                                    licensePlate);
+            parkingBlock = vehicleType;
+        }
 
-// ---------- implementation ----------------------------
+        if (numberInLot == FAILED_TO_FIND_SPOT_FOR_HANDICAPPED ||
+            numberInLot == FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
+            printParkFailure(vehicleType,licensePlate,entranceTime);
+            return ParkingResult::NO_EMPTY_SPOT;
+        }
 
-ParkingLot::~ParkingLot() {
-   //todo: maybe delete map?
-}
+        ParkingSpot newSpot(parkingBlock,numberInLot);
+        printParkSuccess(vehicleType,licensePlate,entranceTime,newSpot);
 
-ParkingResult ParkingLot::enterParking(VehicleType vehicleType,
-             LicensePlate licensePlate,
-             Time entranceTime) {    
-    VehicleType parkingBlock;
-    int numberInLot;
+        VehicleEntry entry(entranceTime,licensePlate,parkingBlock,numberInLot,
+            vehicleType);
+        
+        this->parkedVehicles.insert({licensePlate,entry});
 
-    if (vehicleType == VehicleType::HANDICAPPED){
-        tie(parkingBlock,numberInLot) = 
-            this->tryFindSpotForHandicapped(licensePlate,entranceTime);             
-    }
-    else {
-        numberInLot = 
-            tryInsertToUniqueArray(this->parkingLots[vehicleType],
-                                   licensePlate);
-        parkingBlock = vehicleType;
-    }
-
-    if (numberInLot == FAILED_TO_FIND_SPOT_FOR_HANDICAPPED ||
-        numberInLot == FAILED_TO_INSERT_TO_UNIQUE_ARRAY){
-        printParkFailure(vehicleType,licensePlate,entranceTime);
-        return ParkingResult::NO_EMPTY_SPOT;
-    }
-
-    ParkingSpot newSpot(parkingBlock,numberInLot);
-    printParkSuccess(vehicleType,licensePlate,entranceTime,newSpot);
-
-    VehicleEntry entry(entranceTime,licensePlate,parkingBlock,numberInLot,
-        vehicleType);
-    
-    this->parkedVehicles.insert({licensePlate,entry});
-
-    return ParkingResult::SUCCESS;
-}
-
-ParkingResult ParkingLot::exitParking(LicensePlate licensePlate, Time exitTime){  
-
-    // if the vehicle doesnt exist
-    if (this->parkedVehicles.count(licensePlate) == 0){ 
-        ParkingLotPrinter::printExitFailure(cout,licensePlate);
-        return ParkingResult::VEHICLE_NOT_FOUND;
-    }
-
-    VehicleEntry leavingVehicle = this->parkedVehicles[licensePlate];
-
-    ParkingLotPrinter::printVehicle(cout,
-                                    leavingVehicle.getParkingSpot()
-                                    .getParkingBlock(),
-                                    licensePlate,
-                                    leavingVehicle.getEntranceTime());
-
-    ParkingLotPrinter::printExitSuccess(cout,
-                                        leavingVehicle.getParkingSpot(),
-                                        exitTime,
-                                        leavingVehicle.
-                                        calculateTotalFee(exitTime));   
-
-    this->exitVehicleFromLot(licensePlate);
-
-    return ParkingResult::SUCCESS;
-}
-
-ParkingResult ParkingLot::getParkingSpot(LicensePlate licensePlate,
-                ParkingSpot& parkingSpot) const{
-    try{        
-        parkingSpot = this->parkedVehicles.at(licensePlate).getParkingSpot();
         return ParkingResult::SUCCESS;
     }
-    catch(const std::out_of_range&){
-        return ParkingResult::VEHICLE_NOT_FOUND;
+
+    ParkingResult ParkingLot::exitParking(LicensePlate licensePlate, Time exitTime){  
+
+        // if the vehicle doesnt exist
+        if (this->parkedVehicles.count(licensePlate) == 0){ 
+            ParkingLotPrinter::printExitFailure(cout,licensePlate);
+            return ParkingResult::VEHICLE_NOT_FOUND;
+        }
+
+        VehicleEntry leavingVehicle = this->parkedVehicles[licensePlate];
+
+        ParkingLotPrinter::printVehicle(cout,
+                                        leavingVehicle.getVehicleType(),
+                                        licensePlate,
+                                        leavingVehicle.getEntranceTime());
+
+        ParkingLotPrinter::printExitSuccess(cout,
+                                            leavingVehicle.getParkingSpot(),
+                                            exitTime,
+                                            leavingVehicle.
+                                            calculateTotalFee(exitTime));   
+
+        this->exitVehicleFromLot(licensePlate);
+
+        return ParkingResult::SUCCESS;
     }
-}
 
-void ParkingLot::inspectParkingLot(Time inspectionTime){
-    int numFined=0;
-
-    for (auto const& parkedVehiclePair : this->parkedVehicles)
-    {
-        LicensePlate licensePlate = parkedVehiclePair.first;
-        VehicleEntry entry = parkedVehiclePair.second;
-
-        Time timediff = inspectionTime - entry.getEntranceTime();
-
-        if (timediff.toHours()>PENALTY_HOUR_LIMIT){
-            entry.addPenalty(PENALTY_FEE);
-            numFined++;
+    ParkingResult ParkingLot::getParkingSpot(LicensePlate licensePlate,
+                    ParkingSpot& parkingSpot) const{
+        try{        
+            parkingSpot = this->parkedVehicles.at(licensePlate).getParkingSpot();
+            return ParkingResult::SUCCESS;
+        }
+        catch(const std::out_of_range&){
+            return ParkingResult::VEHICLE_NOT_FOUND;
         }
     }
 
-    ParkingLotPrinter::printInspectionResult(cout,inspectionTime,numFined);
-}
+    void ParkingLot::inspectParkingLot(Time inspectionTime){
+        int numFined=0;
 
-ostream& operator<<(ostream& os, const ParkingLot& parkingLot){
-    
-    ParkingLotPrinter::printParkingLotTitle(os);
-    
-    vector<VehicleEntry> sortedEntries 
-        = getSortedVectorOfVehicleEntries(parkingLot.getParkedVehicles());
-    
-    for(const auto& entry: sortedEntries) {       
-        ParkingLotPrinter::printVehicle(os,entry.getVehicleType(),
-        entry.getLicensePlate(), entry.getEntranceTime());
+        for (auto & parkedVehiclePair : this->parkedVehicles)
+        {            
+            VehicleEntry& entry = parkedVehiclePair.second;
 
-        ParkingLotPrinter::printParkingSpot(os,entry.getParkingSpot());
+            Time timediff = inspectionTime - entry.getEntranceTime();
+
+            if (timediff.toHours()>PENALTY_HOUR_LIMIT && entry.getPenalty()==0){
+                entry.addPenalty(PENALTY_FEE);
+                numFined++;
+            }
+        }
+
+        ParkingLotPrinter::printInspectionResult(cout,inspectionTime,numFined);
     }
 
-    return os;
-}
+    ostream& operator<<(ostream& os, ParkingLot const& parkingLot){
+        
+        ParkingLotPrinter::printParkingLotTitle(os);
+        
+        vector<VehicleEntry> sortedEntries 
+            = getSortedVectorOfVehicleEntries(parkingLot.getParkedVehicles());
+        
+        for(const auto& entry: sortedEntries) {       
+            ParkingLotPrinter::printVehicle(os,entry.getVehicleType(),
+            entry.getLicensePlate(), entry.getEntranceTime());
 
+            ParkingLotPrinter::printParkingSpot(os,entry.getParkingSpot());
+        }
+
+        return os;
+    }
+}
 
 
 
