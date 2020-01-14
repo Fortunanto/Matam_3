@@ -13,7 +13,6 @@ namespace MtmParkingLot {
     const int AMOUNT_OF_VEHICLE_TYPES = 3;
 
     const int FAILED_TO_INSERT_TO_UNIQUE_ARRAY = -1;
-    const int FAILED_TO_FIND_SPOT = -1;
 
     const int PENALTY_HOUR_LIMIT = 24;
     const int PENALTY_FEE = 250;
