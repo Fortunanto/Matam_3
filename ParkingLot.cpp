@@ -20,6 +20,13 @@ namespace MtmParkingLot {
 
     // ----------------- helper funcs ----------------------------
 
+    /**
+     * Tries to insert an element of type string to UniqueArray.
+     * @param arr
+     * @param licensePlate
+     * @return If insertion was successful -The index in the array the element was inserted to.
+     *         Otherwise, returns -1.
+     */
     int tryInsertToUniqueArray(UniqueArray<string>& arr,
                             LicensePlate licensePlate){
         try {
@@ -30,24 +37,45 @@ namespace MtmParkingLot {
             }
     }
 
+    /**
+     * Print a message to the console that notes that a park attempt had failed.
+     * @param vehicleType - The type of the vehicle tries to parking.
+     * @param licensePlate
+     * @param entranceTime - The time in which the vehicle is trying to park.
+     */
     void printParkFailure(VehicleType vehicleType, LicensePlate licensePlate,
                             Time entranceTime){
-                                // todo: maybe add endl?
         ParkingLotPrinter::printVehicle(cout,vehicleType,licensePlate,entranceTime);
         ParkingLotPrinter::printEntryFailureNoSpot(cout);
     }
 
+    /**
+     * Print a message to the console that notes that a park attempt was successful.
+     * @param vehicleType - The type of the vehicle.
+     * @param licensePlate
+     * @param entranceTime - The time of parking in the lot.
+     * @param parkingSpot - The spot in which the vehicle had parked.
+     */
     void printParkSuccess(VehicleType vehicleType, LicensePlate licensePlate,
                             Time entranceTime,ParkingSpot parkingSpot){
         ParkingLotPrinter::printVehicle(cout,vehicleType,licensePlate,entranceTime);        
         ParkingLotPrinter::printEntrySuccess(cout,parkingSpot);   
     }
 
+    /**
+     * Print a message to the console that notes that a vehicle is already in the lot.
+     * @param entry - The data of the vehicle that is already in the lot.
+     */
     void printAlreadyParked(VehicleEntry entry){
         ParkingLotPrinter::printVehicle(cout,entry.getVehicleType(),entry.getLicensePlate(),entry.getEntranceTime());
         ParkingLotPrinter::printEntryFailureAlreadyParked(cout,entry.getParkingSpot());        
     }
 
+    /**
+     * Gets a sorted vector of all the entries given as values of a map of <string,VehicleEntry>.
+     * @param inputMap - A map of vehicle entries.
+     * @return The sorted VehicleEntry vector.
+     */
     vector<VehicleEntry>
     getSortedVectorOfVehicleEntries(map<string,VehicleEntry> inputMap){
         vector<VehicleEntry> resultVec;
@@ -98,10 +126,6 @@ namespace MtmParkingLot {
 
     // ---------- implementation ----------------------------
 
-    ParkingLot::~ParkingLot() {
-    //todo: maybe delete map?
-    }
-
     ParkingResult ParkingLot::enterParking(VehicleType vehicleType,
                 LicensePlate licensePlate,
                 Time entranceTime) {    
@@ -141,7 +165,8 @@ namespace MtmParkingLot {
         return ParkingResult::SUCCESS;
     }
 
-    ParkingResult ParkingLot::exitParking(LicensePlate licensePlate, Time exitTime){  
+    ParkingResult ParkingLot::exitParking(LicensePlate licensePlate,
+         Time exitTime){  
 
         // if the vehicle doesnt exist
         if (this->parkedVehicles.count(licensePlate) == 0){ 
@@ -170,7 +195,8 @@ namespace MtmParkingLot {
     ParkingResult ParkingLot::getParkingSpot(LicensePlate licensePlate,
                     ParkingSpot& parkingSpot) const{
         try{        
-            parkingSpot = this->parkedVehicles.at(licensePlate).getParkingSpot();
+            parkingSpot = this->parkedVehicles.at(licensePlate)
+                                                .getParkingSpot();
             return ParkingResult::SUCCESS;
         }
         catch(const std::out_of_range&){

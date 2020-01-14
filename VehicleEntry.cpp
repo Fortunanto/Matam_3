@@ -50,7 +50,7 @@ namespace MtmParkingLot {
                                         CAR_ADDITIONAL_HOURS_PRICE);
                 break;
             case VehicleType::HANDICAPPED:
-                totalFee += 15;
+                totalFee += HANDICAPPED_FEE;
                 break;    
             default:
                 break;

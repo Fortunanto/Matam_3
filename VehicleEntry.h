@@ -9,7 +9,9 @@ using namespace ParkingLotUtils;
 
 namespace MtmParkingLot{
     
-    // todo: comment
+    /**
+     * An entry of a vehicle parking in the lot.
+     */
     class VehicleEntry {
         Time entranceTime;
         LicensePlate licensePlate;
@@ -30,6 +32,12 @@ namespace MtmParkingLot{
         ParkingSpot getParkingSpot() const{return parkingSpot;}
         Time getEntranceTime() const{return entranceTime;}
         LicensePlate getLicensePlate() const {return licensePlate;}
+
+        /**
+         * Calculates the total fee that is needed to be paid by this entry.
+         * @param exitTime - The time of leaving the parking lot
+         * @return The amount of fee that is required.
+         */
         int calculateTotalFee(Time exitTime) const;  
         VehicleType getVehicleType() const{return vehicleType;}
         void addPenalty (int penaltyToAdd){this->penalty+=penaltyToAdd;}
