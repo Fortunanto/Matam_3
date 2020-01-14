@@ -171,6 +171,8 @@ ParkingResult ParkingLot::getParkingSpot(LicensePlate licensePlate,
 }
 
 void ParkingLot::inspectParkingLot(Time inspectionTime){
+    int numFined=0;
+
     for (auto const& parkedVehiclePair : this->parkedVehicles)
     {
         LicensePlate licensePlate = parkedVehiclePair.first;
@@ -180,8 +182,11 @@ void ParkingLot::inspectParkingLot(Time inspectionTime){
 
         if (timediff.toHours()>PENALTY_HOUR_LIMIT){
             entry.addPenalty(PENALTY_FEE);
+            numFined++;
         }
     }
+
+    ParkingLotPrinter::printInspectionResult(cout,inspectionTime,numFined);
 }
 
 ostream& operator<<(ostream& os, const ParkingLot& parkingLot){
