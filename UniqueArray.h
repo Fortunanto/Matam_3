@@ -25,7 +25,7 @@ public:
     class UniqueArrayIsFullException{};
 private:
      Element const ** backingData;
-    unsigned int size;
+    unsigned int length;
     Compare comperator;
 };
 
@@ -33,3 +33,4 @@ private:
 
 #include "UniqueArrayImp.h"
 #endif //MTMPARKINGLOT_UNIQUEARRAY_H
+
