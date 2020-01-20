@@ -16,7 +16,7 @@ namespace MtmParkingLot {
 
     int calcFeeByTime(Time parkTime, int firstHourFee, int additionalHoursFee){
         int hours = parkTime.toHours();
-        
+                
         if (hours == 0){
             return 0;
         }
@@ -50,7 +50,9 @@ namespace MtmParkingLot {
                                         CAR_ADDITIONAL_HOURS_PRICE);
                 break;
             case VehicleType::HANDICAPPED:
-                totalFee += HANDICAPPED_FEE;
+                if (timeInParking.toHours()!=0){
+                    totalFee += HANDICAPPED_FEE;
+                }
                 break;    
             default:
                 break;
