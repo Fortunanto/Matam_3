@@ -6,9 +6,8 @@
 #define MTMPARKINGLOT_UNIQUEARRAYIMP_H
 
 template <class Element, class Compare>
-UniqueArray<Element, Compare>::UniqueArray(unsigned int size) : backingData(new Element const *[size]),
-                                                                length(size)
-{
+UniqueArray<Element, Compare>::UniqueArray(unsigned int size) : backingData(new Element  *[size]),
+                                                                length(size){
     for (unsigned int i = 0; i < length; i++)
     {
         backingData[i] = nullptr;
@@ -16,9 +15,8 @@ UniqueArray<Element, Compare>::UniqueArray(unsigned int size) : backingData(new 
 }
 
 template <class Element, class Compare>
-UniqueArray<Element, Compare>::UniqueArray(const UniqueArray &other) : backingData(new Element const *[other.length]),
-                                                                       length(other.length)
-{
+UniqueArray<Element, Compare>::UniqueArray(const UniqueArray &other) : backingData(new Element  *[other.length]),
+                                                                       length(other.length){
     for (unsigned int i = 0; i < length; i++)
     {
         if (other.backingData[i])
@@ -45,8 +43,7 @@ UniqueArray<Element, Compare>::~UniqueArray()
     delete[] backingData;
 }
 template <class Element, class Compare>
-bool UniqueArray<Element, Compare>::getIndex(const Element &element, unsigned int &index) const
-{
+bool UniqueArray<Element, Compare>::getIndex(const Element &element, unsigned int &index) const{
     for (unsigned int i = 0; i < length; i++)
     {
         if (backingData[i])
@@ -62,38 +59,25 @@ bool UniqueArray<Element, Compare>::getIndex(const Element &element, unsigned in
 }
 
 template <class Element, class Compare>
-unsigned int UniqueArray<Element, Compare>::insert(const Element &element)
-{
-    int first_empty_index = -1;
+unsigned int UniqueArray<Element, Compare>::insert(const Element &element){
+    unsigned int index;
+    if(getIndex(element,index)){
+        return index;
+    }
     for (unsigned int i = 0; i < length; i++)
     {
         if (!backingData[i])
         {
-            if (first_empty_index == -1)
-            {
-                first_empty_index = i;
-            }
-        }
-        else
-        {
-            if (comperator(*backingData[i], element))
-            {
+                backingData[i] = new Element(element);
                 return i;
-            }
         }
     }
-    if (first_empty_index == -1)
-    {
-        throw UniqueArrayIsFullException();
-    }
-
-    backingData[first_empty_index] = new Element(element);
-    return first_empty_index;
+    //in case of no empty place, the code reaches this point.
+    throw UniqueArrayIsFullException();
 }
 
 template <class Element, class Compare>
-const Element *UniqueArray<Element, Compare>::operator[](const Element &element) const
-{
+const Element *UniqueArray<Element, Compare>::operator[](const Element &element) const{
     for (unsigned int i = 0; i < length; i++)
     {
         if (backingData[i])
@@ -106,8 +90,7 @@ const Element *UniqueArray<Element, Compare>::operator[](const Element &element)
 }
 
 template <class Element, class Compare>
-bool UniqueArray<Element, Compare>::remove(const Element &element)
-{
+bool UniqueArray<Element, Compare>::remove(const Element &element){
     for (unsigned int i = 0; i < length; i++)
     {
         if (backingData[i])
@@ -124,14 +107,12 @@ bool UniqueArray<Element, Compare>::remove(const Element &element)
 }
 
 template <class Element, class Compare>
-unsigned int UniqueArray<Element, Compare>::getSize() const
-{
+unsigned int UniqueArray<Element, Compare>::getSize() const{
     return length;
 }
 
 template <class Element, class Compare>
-unsigned int UniqueArray<Element, Compare>::getCount() const
-{
+unsigned int UniqueArray<Element, Compare>::getCount() const{
     int counter = 0;
     for (unsigned int i = 0; i < length; i++)
     {
@@ -144,8 +125,7 @@ unsigned int UniqueArray<Element, Compare>::getCount() const
 }
 
 template <class Element, class Compare>
-UniqueArray<Element, Compare> UniqueArray<Element, Compare>::filter(const UniqueArray::Filter &f) const
-{
+UniqueArray<Element, Compare> UniqueArray<Element, Compare>::filter(const UniqueArray::Filter &f) const{
     UniqueArray<Element, Compare> copy = UniqueArray(length);
     for (unsigned int i = 0; i < length; i++)
     {

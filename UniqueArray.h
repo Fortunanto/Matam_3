@@ -24,7 +24,7 @@ public:
 
     class UniqueArrayIsFullException{};
 private:
-     Element const ** backingData;
+     Element ** backingData;
     unsigned int length;
     Compare comperator;
 };
